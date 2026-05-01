@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="id-ID">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            var role = localStorage.getItem('nms_role');
+            if (role === 'viewer') { window.location.href = "/"; }
+        })();
+    </script>
+    <title data-lang="bc_title">WHATSAPP BROADCAST</title>
+    <script>try { var t = localStorage.getItem('nms_web_title'); if (t) document.title = t; } catch (e) { }</script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/css/all.min.css" onerror="this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/finance.css?v=3.3.7">
+    <script src="/static/js/lang_dict.js"></script>
+    <script>initAntiFlicker();</script>
+    <style>
+        .bc-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        .bc-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 28px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .bc-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .bc-header {
+            margin-bottom: 20px;
+        }
+
+        .bc-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #3b82f6;
+        }
+
+        .bc-header p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .bc-composer-section {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 24px;
+            width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .bc-composer-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .bc-textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #f8fafc;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .bc-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .bc-vars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .bc-var-btn {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex: 0 1 auto;
+            width: auto !important;
+            margin-bottom: 5px;
+        }
+
+        .bc-var-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        @media (max-width: 768px) {
+            .bc-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            .bc-card {
+                padding: 20px;
+            }
+            .bc-var-btn {
+                padding: 4px 10px;
+                font-size: 12px;
+            }
+            .bc-composer-section {
+                gap: 15px;
+            }
+        }
+
+        .bc-filter-item {
+            margin-bottom: 15px;
+        }
+
+        .bc-filter-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .bc-select, .bc-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .bc-odp-grid {
+            max-height: 150px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .bc-odp-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .bc-progress-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 12px;
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+        }
+
+        .bc-progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .bc-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .bc-table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .bc-log-box {
+            margin-top: 20px;
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: #10b981;
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bc-action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .btn-bc-send {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-bc-stop {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .bc-status-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-wait { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+        .status-proc { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .status-sent { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        .bc-image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            border: 2px dashed rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .bc-image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .bc-image-remove {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        /* === TOAST NOTIFICATION === */
+        .nms-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .nms-toast {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 420px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s ease;
+        }
+        .nms-toast.toast-out {
+            animation: toastSlideOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+        }
+        .nms-toast-icon {
+            width: 32px; height: 32px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .nms-toast-body { flex: 1; line-height: 1.4; }
+        .nms-toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+        .nms-toast-msg { font-weight: 400; font-size: 12px; opacity: 0.85; }
+        .nms-toast-close {
+            background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer;
+            font-size: 14px; padding: 4px; transition: color 0.2s;
+        }
+        .nms-toast-close:hover { color: #fff; }
+        .nms-toast-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 0 12px 12px;
+            animation: toastProgress linear forwards;
+        }
+        .nms-toast.toast-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.25));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .nms-toast.toast-success .nms-toast-icon { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .nms-toast.toast-success .nms-toast-progress { background: #10b981; }
+        .nms-toast.toast-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.25));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .nms-toast.toast-error .nms-toast-icon { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .nms-toast.toast-error .nms-toast-progress { background: #ef4444; }
+        .nms-toast.toast-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .nms-toast.toast-warning .nms-toast-icon { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .nms-toast.toast-warning .nms-toast-progress { background: #f59e0b; }
+        .nms-toast.toast-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.25));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .nms-toast.toast-info .nms-toast-icon { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .nms-toast.toast-info .nms-toast-progress { background: #3b82f6; }
+        @keyframes toastSlideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastSlideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
+        }
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* === CUSTOM CONFIRM MODAL === */
+        .nms-confirm-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 99998; display: flex; align-items: center; justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .nms-confirm-box {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 30px; max-width: 400px; width: 90%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+        .nms-confirm-icon {
+            width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+        .nms-confirm-icon.warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 2px solid rgba(245,158,11,0.3); }
+        .nms-confirm-icon.danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 2px solid rgba(239,68,68,0.3); }
+        .nms-confirm-title { font-size: 18px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+        .nms-confirm-text { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+        .nms-confirm-btns { display: flex; gap: 10px; justify-content: center; }
+        .nms-confirm-btn {
+            padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 13px;
+            cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .nms-confirm-btn.cancel {
+            background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nms-confirm-btn.cancel:hover { background: rgba(255,255,255,0.1); color: #f1f5f9; }
+        .nms-confirm-btn.confirm {
+            background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .nms-confirm-btn.confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
+        .nms-confirm-btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626); color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        .nms-confirm-btn.danger:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.4); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+
+<body data-page-key="bc_title">
+    <div id="login-overlay">
+        <div class="login-box">
+            <div id="loginBranding" class="login-branding">
+                <h2 id="loginTitle" class="login-title"></h2>
+            </div>
+            <input type="password" id="passInput" onkeyup="if(event.key==='Enter') doLogin()" data-lang="ph_pass" data-lang-target="placeholder">
+            <button class="btn btn-primary" onclick="doLogin()" data-lang="btn_login"></button>
+            <div id="loginMsg" data-lang="msg_pwd_wrong"></div>
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="brand-wrapper" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 10px; margin-bottom: 20px;">
+            <button class="btn-sidebar-toggle desktop-only" onclick="toggleMiniSidebar()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer; width:40px; height:40px; display:flex; align-items:center; justify-content:center; z-index:1001;">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="brand-text" id="brandText" style="font-weight:800; color:#3b82f6; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:8px; flex:1; transition: all 0.3s ease;"></span>
+        </div>
+
+        <div class="menu-label" data-lang="sb_h_main"></div>
+        <a href="/" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-home me-2"></i> <span data-lang="sb_dash"></span>
+        </a>
+        <a href="/maps" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-map-marked-alt me-2"></i> <span data-lang="sb_map"></span>
+        </a>
+        <a href="/client" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-users me-2"></i> <span data-lang="sb_client"></span>
+        </a>
+        <a href="/pppoe" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-network-wired me-2"></i> <span data-lang="sb_pppoe"></span>
+        </a>
+        <a href="/hotspot" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-wifi me-2"></i> <span data-lang="sb_hotspot"></span>
+        </a>
+
+        <div class="menu-label" data-lang="sb_h_admin"></div>
+        <a href="/network" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-boxes me-2"></i> <span data-lang="sb_inv"></span>
+        </a>
+        <a href="/network?tab=infra" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-network-wired me-2"></i> <span data-lang="sb_infra"></span>
+        </a>
+        <a href="/billing" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-file-invoice-dollar me-2"></i> <span data-lang="sb_bill"></span>
+        </a>
+        <a href="/finance" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-wallet me-2"></i> <span data-lang="sb_fin"></span>
+        </a>
+
+        <div class="menu-item active" onclick="window.location.reload()">
+            <i class="fas fa-paper-plane me-2"></i> <span data-lang="bc_title"></span>
+        </div>
+
+        <div class="menu-label" data-lang="sb_h_mon"></div>
+        <a href="/monitor?tab=traffic" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-chart-line me-2"></i> <span data-lang="sb_traffic"></span>
+        </a>
+        <a href="/monitor?tab=logs" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-history me-2"></i> <span data-lang="sb_logs"></span>
+        </a>
+        <a href="/settings" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-cog me-2"></i> <span data-lang="sb_set"></span>
+        </a>
+        <a href="/about" class="menu-item" style="text-decoration:none;">
+            <i class="fas fa-info-circle me-2"></i> <span data-lang="sb_about"></span>
+        </a>
+
+        <div class="menu-item menu-danger" onclick="doLogout()">
+            <i class="fas fa-sign-out-alt me-2"></i> <span data-lang="sb_logout"></span>
+        </div>
+    </div>
+
+    <div class="overlay-bg" onclick="toggleSidebar()"></div>
+
+    <main class="main" id="mainContent">
+        <div class="bc-container">
+            <div class="bc-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap;">
+                <div>
+                    <h1 data-lang="bc_title"></h1>
+                    <p data-lang="bc_subtitle"></p>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+                    <div id="roleBadge" class="muted role-badge" style="font-size:11px;">-</div>
+                    <div class="lang-badge">
+                        <span data-lang="lbl_lang_prefix">LANG: </span><span id="currentLangDisplay" class="lang-disp"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bc-composer-section">
+                <!-- Composer -->
+                <div class="bc-card">
+                    <div class="bc-filter-item">
+                        <label class="bc-filter-label" data-lang="bc_msg_label"></label>
+                        <textarea class="bc-textarea" id="bcMessage" data-lang="bc_ph_msg"></textarea>
+                        <div class="bc-vars">
+                            <span class="bc-filter-label" style="width:100%;" data-lang="bc_var_hint"></span>
+                            {% raw %}
+                            <button class="bc-var-btn" onclick="insertVar('{{nama}}')">{{nama}}</button>
+                            <button class="bc-var-btn" onclick="insertVar('{{bulan}}')">{{bulan}}</button>
+                            {% endraw %}
+                        </div>
+                    </div>
+
+                    <div class="bc-filter-item">
+                        <label class="bc-filter-label" data-lang="bc_img_label"></label>
+                        <div class="bc-image-preview" id="bcImgPreview">
+                            <i class="fas fa-image fa-2x" style="color:#475569"></i>
+                        </div>
+                        <input type="file" id="bcImgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-sidebar-toggle" style="background:#334155; padding:8px 15px; border-radius:8px; font-size:12px; cursor:pointer;" onclick="document.getElementById('bcImgInput').click()">
+                                <i class="fas fa-upload me-1"></i> <span data-lang="btn_upload"></span>
+                            </button>
+                            <p style="font-size:11px; color:#64748b; margin-top:5px;" data-lang="bc_img_hint"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Filter -->
+                <div class="bc-card">
+                    <div class="bc-filter-item">
+                        <label class="bc-filter-label" data-lang="bc_target_label"></label>
+                        <select class="bc-select" id="bcTargetMode" onchange="toggleFilterFields()">
+                            <option value="all" data-lang="bc_mode_all"></option>
+                            <option value="odp" data-lang="bc_mode_odp"></option>
+                            <option value="type" data-lang="bc_mode_type"></option>
+                            <option value="unpaid" data-lang="bc_mode_unpaid"></option>
+                            <option value="custom" data-lang="bc_mode_custom"></option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic: ODP Multi Select -->
+                    <div id="bcOdpWrap" style="display:none">
+                        <label class="bc-filter-label" data-lang="bc_sel_odp"></label>
+                        <div class="bc-odp-grid" id="bcOdpList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Dynamic: Type Radio -->
+                    <div id="bcTypeWrap" style="display:none">
+                        <label class="bc-filter-label" data-lang="bc_sel_type"></label>
+                        <div style="display:flex; gap:10px;">
+                            <label class="bc-odp-checkbox"><input type="radio" name="stype" value="pppoe" checked onchange="updatePrepare()"> PPPoE</label>
+                            <label class="bc-odp-checkbox"><input type="radio" name="stype" value="static" onchange="updatePrepare()"> Statik</label>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic: Custom Table -->
+                    <div id="bcCustomWrap" style="display:none">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                             <label class="bc-filter-label" style="margin:0" data-lang="bc_mode_custom"></label>
+                             <div style="display:flex; gap:5px;">
+                                <button class="bc-var-btn" style="background:#334155; font-size:11px;" onclick="downloadTemplate()" title="Template Excel"><i class="fas fa-file-download"></i></button>
+                                <button class="bc-var-btn" style="background:#334155; font-size:11px;" onclick="document.getElementById('excelInput').click()" title="Upload Excel"><i class="fas fa-file-excel"></i></button>
+                                <input type="file" id="excelInput" style="display:none" onchange="handleExcel(event)">
+                             </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                            <input type="text" class="bc-input" id="custName" data-lang="bc_custom_name" placeholder="Nama">
+                            <input type="text" class="bc-input" id="custWa" data-lang="bc_custom_wa" placeholder="628xxx">
+                        </div>
+                        <button class="bc-var-btn" style="width:100%; margin-top:8px; padding:8px;" onclick="addCustomRow()" data-lang="bc_btn_add_custom"></button>
+                    </div>
+
+                    <div id="bcEstArea" style="margin-top:20px; text-align:right">
+                         <span class="bc-filter-label" style="display:inline" data-lang="bc_label_est"></span>
+                         <span id="bcEstCount" style="font-weight:800; color:#3b82f6; font-size:18px">0</span>
+                    </div>
+
+                    <div class="bc-action-btns">
+                        <button class="btn-bc-send" id="btnSendBC" onclick="startBroadcast()" data-lang="bc_btn_send"></button>
+                        <button class="btn-bc-stop" id="btnStopBC" onclick="stopBroadcast()" style="display:none" data-lang="bc_btn_stop"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Area -->
+            <div id="bcProgressWrap" style="display:none">
+                <div class="bc-card bc-progress-area">
+                    <div style="display:flex; justify-content:space-between">
+                        <div class="bc-filter-label" data-lang="bc_label_prog"></div>
+                        <div style="font-size:12px; color:#94a3b8"><span id="bcSent">0</span> / <span id="bcTotal">0</span> (<span id="bcFailed">0</span> <span data-lang="bc_status_fail"></span>)</div>
+                    </div>
+                    <div class="bc-progress-bar">
+                        <div class="bc-progress-fill" id="bcProgFill"></div>
+                    </div>
+                    <div style="text-align:center; font-size:12px; font-weight:700; color:#3b82f6" id="bcPerc">0%</div>
+                </div>
+            </div>
+
+            <!-- Preview Table -->
+            <div class="bc-card">
+                <div class="bc-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 style="font-size:18px; font-weight:700; color:#f8fafc; margin:0;" data-lang="bc_target_label"></h2>
+                    <button class="bc-btn" id="btnClearLog" style="padding: 6px 14px; font-size: 11px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; display: flex; align-items: center; gap: 8px; border-radius: 8px;" onclick="clearLog()">
+                         <i class="fas fa-broom"></i> <span data-lang="bc_btn_clear_list"></span>
+                    </button>
+                </div>
+                <div class="bc-table-container">
+                    <table class="fin-table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th style="width:50px" data-lang="bc_th_no"></th>
+                                <th data-lang="bc_th_name"></th>
+                                <th data-lang="bc_th_wa"></th>
+                                <th style="width:120px" data-lang="bc_th_status"></th>
+                                <th style="width:80px" data-lang="bc_th_action"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="bcTableBody">
+                            <!-- Populated -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div style="margin-top:15px; display:flex; justify-content:center; gap:5px;" id="bcPagination">
+                </div>
+            </div>
+
+            <!-- Log Box -->
+            <div class="bc-card" style="padding:15px">
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                     <div class="bc-filter-label" style="margin-bottom:0" data-lang="bc_log_title"></div>
+                 </div>
+                 <div class="bc-log-box" id="bcLogBox" data-lang="bc_log_ready">
+                 </div>
+            </div>
+
+            <!-- WARNING SECTION -->
+            <div class="bc-card" style="margin-top:20px; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); padding: 20px;">
+                <div style="color: #f59e0b; font-weight: 800; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i> <span data-lang="bc_warn_title"></span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: #f59e0b;">•</span>
+                        <span data-lang="bc_warn_reload"></span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: #f59e0b;">•</span>
+                        <span data-lang="bc_warn_banned"></span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: #f59e0b;">•</span>
+                        <span data-lang="bc_warn_not_resp"></span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="color: #f59e0b;">•</span>
+                        <span data-lang="bc_warn_safety"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        let currentTargets = [];
+        let allOdp = [];
+        let currentPage = 1;
+        let pageSize = 10;
+        let isRunning = false;
+        let currentImage = null;
+        let displayedLogIds = new Set();
+        let sessionBase = null; // Tracks current batch session ID
+
+        // Auto Load
+        window.addEventListener('DOMContentLoaded', async () => {
+            applyLanguage();
+            loadOdpList();
+            checkCurrentSession();
+            loadFromLocalStorage(); // Restore from previous session if any
+            setInterval(syncStatus, 10000); // 10s status sync
+        });
+
+        function insertVar(v) {
+            const el = document.getElementById('bcMessage');
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            const text = el.value;
+            el.value = text.substring(0, start) + v + text.substring(end);
+            el.focus();
+        }
+
+        async function loadOdpList() {
+            try {
+                const r = await fetch('/api/nodes?type=odp', { headers: getAuthHeaders() });
+                const data = await r.json();
+                // ODP types: switch htb, jb, odp tiang, etc are all in topo.odps
+                allOdp = data.nodes || [];
+                const wrap = document.getElementById('bcOdpList');
+                if (allOdp.length === 0) {
+                    wrap.innerHTML = `<div style="grid-column: span 2; color: #64748b; font-size: 11px; padding: 10px; text-align: center;">${t('bc_no_odp')}</div>`;
+                    return;
+                }
+                wrap.innerHTML = allOdp.map(o => `
+                    <label class="bc-odp-checkbox">
+                        <input type="checkbox" value="${o.id}" onchange="updatePrepare()"> ${o.name}
+                    </label>
+                `).join('');
+            } catch(e) {
+                console.error("Failed to load ODP list:", e);
+            }
+        }
+
+        function toggleFilterFields() {
+            const mode = document.getElementById('bcTargetMode').value;
+            document.getElementById('bcOdpWrap').style.display = (mode === 'odp' ? 'block' : 'none');
+            document.getElementById('bcTypeWrap').style.display = (mode === 'type' ? 'block' : 'none');
+            document.getElementById('bcCustomWrap').style.display = (mode === 'custom' ? 'block' : 'none');
+            
+            if (mode !== 'custom') updatePrepare();
+            else {
+                currentTargets = [];
+                renderTable();
+                document.getElementById('bcEstCount').innerText = 0;
+            }
+        }
+
+        async function updatePrepare() {
+            const mode = document.getElementById('bcTargetMode').value;
+            if (mode === 'custom') return;
+
+            let body = { mode: mode };
+            if (mode === 'odp') {
+                const checked = Array.from(document.querySelectorAll('#bcOdpList input:checked')).map(i => i.value);
+                body.odp_ids = checked;
+                if (checked.length === 0) {
+                    currentTargets = [];
+                    renderTable();
+                    document.getElementById('bcEstCount').innerText = 0;
+                    return;
+                }
+            } else if (mode === 'type') {
+                body.service_type = document.querySelector('input[name="stype"]:checked').value;
+            }
+
+            try {
+                const r = await fetch('/api/broadcast/prepare', {
+                    method: 'POST',
+                    headers: Object.assign({'Content-Type': 'application/json'}, getAuthHeaders()),
+                    body: JSON.stringify(body)
+                });
+                const res = await r.json();
+                currentTargets = res.targets || [];
+                saveToLocalStorage();
+                currentPage = 1;
+                renderTable();
+                document.getElementById('bcEstCount').innerText = currentTargets.length;
+            } catch(e) {
+                console.error("Prepare failed:", e);
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('nms_bc_targets', JSON.stringify(currentTargets));
+            } catch(e) {}
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem('nms_bc_targets');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.length > 0 && currentTargets.length === 0) {
+                        currentTargets = parsed;
+                        renderTable();
+                        document.getElementById('bcEstCount').innerText = currentTargets.length;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function removeRecipient(idx) {
+            nmsConfirm({
+                title: t('bc_confirm_del'),
+                icon: 'danger'
+            }).then((confirmed) => {
+                if (confirmed) {
+                    currentTargets.splice(idx, 1);
+                    saveToLocalStorage();
+                    renderTable();
+                    document.getElementById('bcEstCount').innerText = currentTargets.length;
+                }
+            });
+        }
+
+        function renderTable() {
+            const start = (currentPage - 1) * pageSize;
+            const paginated = currentTargets.slice(start, start + pageSize);
+            const body = document.getElementById('bcTableBody');
+            
+            if (paginated.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#64748b">${t('bc_no_target_data')}</td></tr>`;
+            } else {
+                body.innerHTML = paginated.map((t, localIdx) => {
+                    const globalIdx = start + localIdx;
+                    const statusKey = t.status || 'pending';
+                    const cls = statusKey === 'pending' ? 'wait' : (statusKey === 'success' ? 'sent' : 'fail');
+                    
+                    const deleteBtn = `
+                        <button class="bc-var-btn" 
+                                style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; ${isRunning ? 'opacity:0.3; cursor:not-allowed;' : ''}" 
+                                onclick="removeRecipient(${globalIdx})" 
+                                ${isRunning ? 'disabled' : ''}>
+                            <i class="fas fa-trash-alt" style="font-size:11px;"></i>
+                        </button>`;
+
+                    return `
+                        <tr>
+                            <td>${globalIdx + 1}</td>
+                            <td>${t.name}</td>
+                            <td>${t.wa}</td>
+                            <td><span class="bc-status-badge status-${cls}">${statusKey}</span></td>
+                            <td>${deleteBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pages = Math.ceil(currentTargets.length / pageSize);
+            const wrap = document.getElementById('bcPagination');
+            if (pages <= 1) { wrap.innerHTML = ''; return; }
+            
+            let html = '';
+            for (let i = 1; i <= pages; i++) {
+                const active = (i === currentPage ? 'style="background:#3b82f6"' : '');
+                html += `<button class="bc-var-btn" ${active} onclick="currentPage=${i}; renderTable()">${i}</button>`;
+            }
+            wrap.innerHTML = html;
+        }
+
+        // Custom Handling
+        function addCustomRow() {
+            const nameEl = document.getElementById('custName');
+            const waEl = document.getElementById('custWa');
+            const name = nameEl.value || 'Klien';
+            const wa = waEl.value;
+            if (!wa) return;
+            
+            currentTargets.push({id: 'custom', name: name, wa: wa, status: 'pending'});
+            saveToLocalStorage();
+            nameEl.value = '';
+            waEl.value = '';
+            document.getElementById('bcEstCount').innerText = currentTargets.length;
+            renderTable();
+        }
+
+        function handleExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+                
+                json.forEach(row => {
+                    const n = row.Nama || row.Name || row.name || 'Klien';
+                    const w = row.WA || row.WhatsApp || row.phone || row.wa || '';
+                    if (w) {
+                         let cleanedWa = w.toString().replace(/[^0-9]/g, '');
+                         if (cleanedWa.startsWith('0')) cleanedWa = '62' + cleanedWa.substring(1);
+                         currentTargets.push({id: 'custom', name: n, wa: cleanedWa, status: 'pending'});
+                    }
+                });
+                renderTable();
+                saveToLocalStorage();
+                document.getElementById('bcEstCount').innerText = currentTargets.length;
+                e.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadTemplate() {
+            const wb = XLSX.utils.book_new();
+            const data = [["Nama", "WA"]];
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "NMS_Broadcast_Template.xlsx");
+        }
+
+        function handleImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                 nmsToast(t('bc_img_max_size'), 'error');
+                 return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = e.target.result;
+                document.getElementById('bcImgPreview').innerHTML = `
+                    <img src="${e.target.result}">
+                    <div class="bc-image-remove" onclick="removeImage(event)"><i class="fas fa-times"></i></div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(e) {
+            if(e) e.stopPropagation();
+            currentImage = null;
+            document.getElementById('bcImgPreview').innerHTML = `<i class="fas fa-image fa-2x" style="color:#475569"></i>`;
+            document.getElementById('bcImgInput').value = '';
+        }
+
+        // Execution logic
+        async function startBroadcast() {
+            if (currentTargets.length === 0) {
+                 nmsToast(t('bc_err_no_target'), 'error');
+                 return;
+            }
+            const msg = document.getElementById('bcMessage').value;
+            if (!msg) {
+                nmsToast(t('bc_err_no_msg'), 'error');
+                return;
+            }
+
+            const conf = await nmsConfirm({
+                title: t('bc_conf_title'),
+                text: t('bc_conf_send_text').replace('{count}', currentTargets.length),
+                confirmText: t('bc_btn_confirm'),
+                cancelText: t('bc_btn_cancel')
+            });
+            if (!conf) return;
+
+            // Reset UI
+            syncStatus();
+            document.getElementById('bcProgressWrap').style.display = 'block';
+            addLog(t('bc_log_start').replace('{count}', currentTargets.length));
+
+            try {
+                const r = await fetch('/api/broadcast/send', {
+                    method: 'POST',
+                    headers: Object.assign({'Content-Type': 'application/json'}, getAuthHeaders()),
+                    body: JSON.stringify({
+                        targets: currentTargets,
+                        message: msg,
+                        image: currentImage
+                    })
+                });
+                const res = await r.json();
+                if (res.status === 'ok') {
+                    isRunning = true;
+                    if (res.session_id_base) {
+                        sessionBase = res.session_id_base;
+                        // Tag our local targets with unique IDs immediately
+                        currentTargets.forEach((t, idx) => {
+                            t.uid = `bc_${sessionBase}_${idx}`;
+                        });
+                        saveToLocalStorage();
+                    }
+                    syncStatus();
+                } else {
+                    nmsToast(res.msg || res.error || t('bc_err_start_fail'), 'error');
+                }
+            } catch(e) {
+                nmsToast(t('bc_err_conn'), 'error');
+            }
+        }
+
+        async function stopBroadcast() {
+            const confirmStop = await nmsConfirm({
+                title: t('bc_conf_stop_title'),
+                text: t('bc_conf_stop_text'),
+                icon: 'danger',
+                confirmText: t('bc_btn_confirm'),
+                cancelText: t('bc_btn_cancel'),
+                danger: true
+            });
+
+            if (!confirmStop) return;
+
+            try {
+                await fetch('/api/broadcast/stop', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                isRunning = false;
+                addLog(t('bc_log_stopped'));
+                syncStatus();
+            } catch(e) {}
+        }
+
+        async function syncStatus() {
+            try {
+                const r = await fetch('/api/broadcast/status', { headers: getAuthHeaders() });
+                const data = await r.json();
+                const session = data.session;
+                
+                if (session && session.status) {
+                    document.getElementById('bcTotal').innerText = session.total || 0;
+                    document.getElementById('bcSent').innerText = session.sent || 0;
+                    document.getElementById('bcFailed').innerText = session.failed || 0;
+                    
+                    const perc = session.total > 0 ? Math.round((session.sent + session.failed) / session.total * 100) : 0;
+                    document.getElementById('bcProgFill').style.width = perc + '%';
+                    document.getElementById('bcPerc').innerText = perc + '%';
+                    
+                    if (session.status === 'running') {
+                        document.getElementById('bcProgressWrap').style.display = 'block';
+                        document.getElementById('btnSendBC').disabled = true;
+                        document.getElementById('btnStopBC').style.display = 'block';
+                        isRunning = true;
+                        
+                        // Restore target list upon reload if currently empty
+                        if (currentTargets.length === 0 && session.targets && session.targets.length > 0) {
+                            currentTargets = session.targets;
+                            renderTable();
+                        }
+                    } else {
+                        const wasRunning = isRunning;
+                        // Keep progress visible if completed so user sees 100%
+                        if (session.status === 'completed') {
+                            document.getElementById('bcProgressWrap').style.display = 'block';
+                        } else {
+                            document.getElementById('bcProgressWrap').style.display = 'none';
+                        }
+                        
+                        document.getElementById('btnSendBC').disabled = false;
+                        document.getElementById('btnStopBC').style.display = 'none';
+                        isRunning = false;
+                        
+                        if (wasRunning) {
+                            renderTable();
+                        }
+                    } // End if running else
+
+                    // Update target statuses based on specific BC IDs
+                    if (data.logs && data.logs.length > 0) {
+                        let changed = false;
+                        data.logs.forEach(l => {
+                            if (!l.id) return;
+                            const target = currentTargets.find(t => t.uid === l.id);
+                            if (target && target.status !== l.status) {
+                                target.status = l.status;
+                                changed = true;
+                            }
+                        });
+                        if (changed) {
+                            saveToLocalStorage();
+                            renderTable();
+                        }
+                    }
+                } // End if session && session.status
+                
+                // Real-time RAW WA Logs sync
+                const lr = await fetch('/api/whatsapp/logs', { headers: getAuthHeaders() });
+                const rawLogs = await lr.json();
+                if (rawLogs && rawLogs.length > 0) {
+                    const box = document.getElementById('bcLogBox');
+                    const lastLogs = rawLogs.slice(-20).join('\n');
+                    if (box.innerText !== lastLogs) {
+                        box.innerText = lastLogs;
+                        box.scrollTop = box.scrollHeight;
+                    }
+                }
+            } catch(e) {
+                console.error("Sync error:", e);
+            }
+        }
+
+        function checkCurrentSession() {
+            syncStatus();
+        }
+
+        function addLog(msg, scroll = true) {
+            const box = document.getElementById('bcLogBox');
+            const p = document.createElement('div');
+            p.innerText = msg;
+            
+            // Success lines color
+            if (msg.includes('SUCCESS')) p.style.color = '#4ade80';
+            if (msg.includes('FAILED')) p.style.color = '#f87171';
+            if (msg.includes('START')) p.style.color = '#3b82f6';
+
+            box.appendChild(p);
+            
+            // Limit shown logs to 100
+            if (box.children.length > 100) box.removeChild(box.firstChild);
+            
+            if (scroll) box.scrollTop = box.scrollHeight;
+        }
+
+        async function clearLog() {
+            const ok = await nmsConfirm({
+                title: t('bc_conf_clear'),
+                icon: 'danger',
+                confirmText: t('bc_btn_confirm'),
+                cancelText: t('bc_btn_cancel'),
+                danger: true
+            });
+            if (!ok) return;
+            try {
+                const r = await fetch('/api/broadcast/reset-session', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const res = await r.json();
+                if (res.status === 'ok') {
+                    document.getElementById('bcLogBox').innerHTML = t('bc_log_cleared');
+                    displayedLogIds.clear();
+                    
+                    // Clear local target memory
+                    localStorage.removeItem('nms_bc_targets');
+                    currentTargets = [];
+                    renderTable();
+                    document.getElementById('bcEstCount').innerText = 0;
+                    document.getElementById('bcProgressWrap').style.display = 'none';
+                    
+                    nmsToast(t('bc_msg_cleared'), 'success');
+                }
+            } catch(e) {
+                nmsToast(t('bc_err_server'), 'error');
+            }
+        }
+
+
+        function getAuthHeaders() {
+            return { 'X-Auth-Token': localStorage.getItem('nms_auth_session') };
+        }
+
+        async function doLogin() {
+            const pass = document.getElementById('passInput').value;
+            const msg = document.getElementById('loginMsg');
+            msg.style.display = 'none';
+
+            try {
+                const r = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass })
+                });
+                const d = await r.json();
+                if (d.status === 'ok') {
+                    localStorage.setItem('nms_auth_session', pass);
+                    localStorage.setItem('nms_role', d.role);
+                    location.reload();
+                } else {
+                    msg.style.display = 'block';
+                }
+            } catch (e) {
+                alert("Login Error: " + e);
+            }
+        }
+
+        function doLogout() {
+            nmsConfirm({
+                title: 'Logout?',
+                text: t('conf_logout') || 'Anda akan keluar dari sesi ini.',
+                icon: 'danger',
+                danger: true
+            }).then((will) => {
+                if (will) {
+                    localStorage.removeItem('nms_auth_session');
+                    localStorage.removeItem('nms_role');
+                    window.location.href = "/";
+                }
+            });
+        }
+
+        (function init() {
+            const pass = localStorage.getItem('nms_auth_session');
+            if (pass) {
+                fetch('/api/settings', { headers: getAuthHeaders() })
+                    .then(r => {
+                        if (r.status === 401) {
+                            document.getElementById('login-overlay').style.display = 'flex';
+                            localStorage.removeItem('nms_auth_session');
+                            return;
+                        }
+                        document.getElementById('login-overlay').style.display = 'none';
+                        removeAntiFlicker();
+                        // Update web title if available
+                        r.json().then(s => {
+                            if (s && s.web_title) {
+                                localStorage.setItem('nms_web_title', s.web_title);
+                                document.querySelectorAll('.brand-text, #brandText, .mobile-brand, #loginTitle').forEach(e => e.innerText = s.web_title);
+                            }
+                        });
+                        
+                        // RESTORED: Check current broadcast session on load
+                        checkCurrentSession();
+                    }).catch(() => {
+                        document.getElementById('login-overlay').style.display = 'flex';
+                    });
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+            }
+        })();
+
+        // RESTORED: Continuous status polling
+        setInterval(syncStatus, 5000);
+
+        function toggleMiniSidebar() {
+            const body = document.body;
+            body.classList.toggle('sidebar-minimized');
+            localStorage.setItem('nms_sidebar_mini', body.classList.contains('sidebar-minimized') ? 'true' : 'false');
+        }
+
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-active');
+        }
+
+        // === TOAST NOTIFICATION SYSTEM ===
+        (function() {
+            let container = document.createElement('div');
+            container.className = 'nms-toast-container';
+            document.body.appendChild(container);
+            window._nmsToastContainer = container;
+        })();
+
+        function nmsToast(message, type = 'info', duration = 4000) {
+            const icons = {
+                success: 'fa-check', error: 'fa-times', warning: 'fa-exclamation', info: 'fa-info'
+            };
+            const titles = {
+                success: t('bc_lbl_success') || 'Success',
+                error: t('bc_lbl_error') || 'Error',
+                warning: t('bc_warn_title') || 'Warning',
+                info: 'Info'
+            };
+            const el = document.createElement('div');
+            el.className = `nms-toast toast-${type}`;
+            el.style.position = 'relative'; el.style.overflow = 'hidden';
+            el.innerHTML = `
+                <div class="nms-toast-icon"><i class="fas ${icons[type]}"></i></div>
+                <div class="nms-toast-body">
+                    <div class="nms-toast-title">${titles[type]}</div>
+                    <div class="nms-toast-msg">${message}</div>
+                </div>
+                <button class="nms-toast-close" onclick="this.parentElement.classList.add('toast-out'); setTimeout(()=>this.parentElement.remove(),350)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="nms-toast-progress" style="animation-duration:${duration}ms"></div>
+            `;
+            window._nmsToastContainer.appendChild(el);
+            setTimeout(() => {
+                if (el.parentElement) {
+                    el.classList.add('toast-out');
+                    setTimeout(() => el.remove(), 350);
+                }
+            }, duration);
+        }
+
+        // === CUSTOM CONFIRM MODAL ===
+        function nmsConfirm(opts = {}) {
+            return new Promise(resolve => {
+                const iconType = opts.danger ? 'danger' : (opts.icon || 'warn');
+                const iconClass = iconType === 'danger' ? 'fa-exclamation-triangle' : 'fa-question';
+                const confirmBtnClass = opts.danger ? 'danger' : 'confirm';
+                const overlay = document.createElement('div');
+                overlay.className = 'nms-confirm-overlay';
+                overlay.innerHTML = `
+                    <div class="nms-confirm-box">
+                        <div class="nms-confirm-icon ${iconType}"><i class="fas ${iconClass}"></i></div>
+                        <div class="nms-confirm-title">${opts.title || 'Konfirmasi'}</div>
+                        ${opts.text ? `<div class="nms-confirm-text">${opts.text}</div>` : '<div style="margin-bottom:24px"></div>'}
+                        <div class="nms-confirm-btns">
+                            <button class="nms-confirm-btn cancel" id="nmsConfCancel">${opts.cancelText || t('bc_btn_cancel') || 'Batal'}</button>
+                            <button class="nms-confirm-btn ${confirmBtnClass}" id="nmsConfOk">${opts.confirmText || t('bc_btn_confirm') || 'OK'}</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                overlay.querySelector('#nmsConfCancel').onclick = () => { overlay.remove(); resolve(false); };
+                overlay.querySelector('#nmsConfOk').onclick = () => { overlay.remove(); resolve(true); };
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+            });
+        }
+
+    </script>
+</body>
+
+</html>
